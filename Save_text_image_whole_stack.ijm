@@ -26,25 +26,6 @@ for (i=0; i<list.length; i++) {
 
 	
 		// Insert Macro here
-
-		// Select nuclei channel
-		title = getTitle();
-		run("Arrange Channels...", "new=3");
-
-		// Create binary mask
-
-		// Go to middle of the stack
-		middleslice=floor(nSlices/2);
-		setSlice(middleslice);
-
-		// Apply threshold 
-		setAutoThreshold("Huang dark");
-		run("Convert to Mask", "method=Huang background=Dark");
-		run("Divide...", "value=255 stack");
-		
-		// Save as text file for every z plane
-		// slicenumber = nSlices
-		
 		for (k=1; k<=nSlices; k++){ 
  			setSlice(k); 
 			saveAs("Text Image",path+k);

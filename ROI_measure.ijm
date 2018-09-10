@@ -1,12 +1,24 @@
 /* Measure expression in NMJ from IHC
  * 19 July 2017
+ * revised: 4 December 2017
  * 
- * Projects average of z series
- * Selects the appropriate channel
- * Makes measurements from 3 ROIs (5um x 5um)
+ * Select folder containing ROIs
+ * Selects folder containing images
+ * Projects max of z series
+ * Subtracts background (user specified)
+ * Selects the appropriate channel (user specified)
+ * Makes measurements from 10 ROIs (5um x 5um; user inputs directory of ROIs)
  */
 
 
+// Retrieve ROIs   
+  macro "Open All" {
+      dir = getDirectory("Choose a Directory ");
+      list = getFileList(dir);
+      for (i=0; i<list.length; i++) {
+          if (endsWith(list[i], ".roi"))
+              roiManager("open", dir+list[i]);
+      }
 
  // Load files
 dir1 = getDirectory("/Volumes/bioc1301/data/20160929_Gal80_FISH/Files/");
@@ -26,19 +38,15 @@ for (i=0; i<list.length; i++) {
 	
 		// Insert Macro here
 		
-		// Retrieve ROIs 
-		roiManager("Open", "/Volumes/bioc1301/data/20160929_Gal80_FISH/xycoordinates.roi 2/0003-0123-0401.roi");
-		roiManager("Open", "/Volumes/bioc1301/data/20160929_Gal80_FISH/xycoordinates.roi 2/0003-0255-0177.roi");
-		roiManager("Open", "/Volumes/bioc1301/data/20160929_Gal80_FISH/xycoordinates.roi 2/0003-0378-0219.roi");
-
-		// Project average intensity from the Z stack
-		run("Z Project...", "projection=[Average Intensity]");
+		
+		// Project max intensity from the Z stack
+		run("Z Project...", "projection=[Max Intensity]");
 		
 		// Select signal channel
-		run("Arrange Channels...", "new=2");
+		//run("Arrange Channels...", "new=1");
 
 		// Subtract background flourescence intensity
-		run("Subtract...", "value=2572");
+		run("Subtract...", "value=1800");
 
 		// Take measurements from each of the ROIs
 		roiManager("Select", 0);
@@ -46,6 +54,20 @@ for (i=0; i<list.length; i++) {
 		roiManager("Select", 1);
 		run("Measure");
 		roiManager("Select", 2);
+		run("Measure");
+		roiManager("Select", 3);
+		run("Measure");
+		roiManager("Select", 4);
+		run("Measure");
+		roiManager("Select", 5);
+		run("Measure");
+		roiManager("Select", 6);
+		run("Measure");
+		roiManager("Select", 7);
+		run("Measure");
+		roiManager("Select", 8);
+		run("Measure");
+		roiManager("Select", 9);
 		run("Measure");
 		close();
 		close();

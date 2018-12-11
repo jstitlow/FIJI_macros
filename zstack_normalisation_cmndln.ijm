@@ -1,5 +1,5 @@
 /* Normalise the intensity of a z-stack
- * 5 April 2018
+ * 11 December 2018
  *
  * Modifications to allow it to run -headless
  *
@@ -118,7 +118,7 @@ for (k=0; k<list.length; k++) {
           		setSlice(i);
           		getStatistics(area, mean, min, max, std);
               correctionfactor = (datasetMean-mean);
-              run("Add...", "value=correctionfactor slice");
+              run("Subtract Background...", "rolling=8 slice");
           		row = nResults;
           		if (nSlices==1)
               		setResult("Area ("+unit+"^2)", row, area);

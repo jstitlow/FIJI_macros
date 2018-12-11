@@ -21,10 +21,11 @@ macro "Calculate mean stack intensity" {
 setBatchMode(true);
 
 // Load files
-indir = getDirectory("~/Desktop/test_batch");
+//indir = getDirectory("~/Desktop/test_batch");
+indir = getArgument();
 list = getFileList(indir);
 
-smFISH_channel = 3;
+smFISH_channel = 1;
 
 // Load file for detector background subtraction
 // function is in line 117
@@ -44,7 +45,7 @@ for (i=0; i<list.length; i++) {
 	path=indir+list[i];
 
 		// Open file
-		run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
+		open(path);
 
 		// Start macro
 
@@ -96,8 +97,8 @@ for (k=0; k<list.length; k++) {
 	print("processing ... "+k+1+"/"+list.length+"\n         "+list[k]);
 	path=indir+list[k];
 
-		// Open file
-		run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
+    // Open file
+    open(path);
 
 		// Start macro
 
@@ -109,18 +110,41 @@ for (k=0; k<list.length; k++) {
 		close();
 		selectWindow(copy2);
 
+    // Create blank array to store average intensity from each z-stack
+		a3=newArray;
+
 		// For each slice, add difference between slice intensity and stack intensity
 		for (m=1; m<=nSlices; m++) {
           	setSlice(m);
           	getStatistics(area, mean, min, max, std);
-          	correctionfactor = (datasetMean-mean);
-          	run("Add...", "value=correctionfactor slice");
+            print ("dataset mean =", datasetMean);
+          	addition = (datasetMean-mean);
+            print ("correction factor =", addition);
+            print (mean, "before");
+            //print ("adding correction factor =", addition);
+          	run("Add...", "value=addition slice");
+            //run("Subtract Background...", "rolling=50 slice");
+            getStatistics(area, mean, min, max, std);
+            print (mean, "after");
+            row = nResults;
+            if (nSlices==1)
+                setResult("Area ("+unit+"^2)", row, area);
+            setResult("Mean ", row, mean);
+            value1=getResult("Mean ",row);
+          a3 = Array.concat(a3, value1);
           	// imageCalculator("Subtract create stack", m,detector_signal);
-	  	}
+
+      }
+
+      // Calculate average stack intensity from the array
+  		Array.getStatistics(a3,min,max,mean);
+  		stackMean = mean;
+  		print("stack mean intensity is ...",stackMean);
+
 
 		// Tidy up
 		selectWindow(copy2);
-		saveAs("Tiff", indir+copy2);
+		//saveAs("Tiff", indir+copy2);
 		close();
 
 	}

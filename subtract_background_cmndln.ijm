@@ -1,14 +1,27 @@
-/* Subtract background from smFISH channel and save as .tiff
- * 10 December 2018
+/* Normalise the intensity of a z-stack
+ * 11 December 2018
  *
- * Just need to specify the channel to be normalised
- * smFISH_channel = 1
+ * Uses 'rolling ball' background subtraction algorithm
  *
- * Uses 'rolling ball' algorithm to subtract background (radius = 8px)
+ * ---Modifications to allow the code to run -headless---
  *
- * -----KNOWN ISSUES-------
+ * -Replaced Bioformats with open by enabling SCIFIO, Edit>Options>IM2>Check SCIFIO
+ * -Also use duplicate hyperstack instead of arrange channels
+ * -Pass directory from command line argument instead of calling finder window
  *
- * Only works for first slice in stack in command line mode
+ * ---Macro commands---
+ *
+ * Select the appropriate channel
+ * Measure average intensity of each image
+ * Save measurements as an array
+ * Calculate stack mean from the array,
+ * calculate the difference between the mean intensity of each frame and the stack mean,
+ * add the difference from each frame.
+ * To normalise an entire dataset, run the script and note the dataset mean intensity from the last file,
+ * then replace stackMean in line 74 with the dataset mean intensity value
+ *
+ * ----Call from the command line with the following script:
+ * fiji --headless --console -macro ~/src/FIJI_macros/zstack_normalisation_v7_cmndln.ijm /path/to/directory
  */
 
 macro "Calculate mean stack intensity" {
@@ -16,39 +29,54 @@ macro "Calculate mean stack intensity" {
 setBatchMode(true);
 
 // Load files
-//indir = getDirectory("~/Desktop/test_batch");
-indir = getArgument();
-list = getFileList(indir);
-
-smFISH_channel = 1;
+//dir1 = getDirectory("Find directory");
+dir1 = getArgument();
+list = getFileList(dir1);
+smFISH_channel = 1
+// Create blank array to store average intensity from the entire directory
+a2=newArray;
 
 // Set up loop to read all files in a directory
-for (i=0; i<list.length; i++) {
-	showProgress(i+1, list.length);
-	print("processing ... "+i+1+"/"+list.length+"\n         "+list[i]);
-	path=indir+list[i];
+for (j=0; j<list.length; j++) {
+	showProgress(j+1, list.length);
+	print("processing ... "+j+1+"/"+list.length+"\n         "+list[j]);
+	path=dir1+list[j];
 
-		// Open file
-		open(path);
+    // Open file
+    open(path);
 
 		// Start macro
 
 		// Duplicate stack and select specific channel
-    original = getTitle();
-    run("Duplicate...", "duplicate channels=smFISH_channel");
-    copy = getTitle();
-    selectWindow(original);
-    close();
-
-    // Subtract Background
-    run("Subtract Background...", "rolling=8 slice");
-
-		// Save and close
-		saveAs("Tiff", path+"_ch"+smFISH_channel);
+		original2 = getTitle();
+		run("Duplicate...", "duplicate channels=smFISH_channel"); // Choose channel here
+		copy2 = getTitle();
+		selectWindow(original2);
 		close();
+		selectWindow(copy2);
 
+    // Step through z-stack and store average intensity measurements in an array
+      		if (nSlices>1) run("Clear Results");
+      		getVoxelSize(w, h, d, unit);
+      		n = getSliceNumber();
+      		for (i=1; i<=nSlices; i++) {
+          		setSlice(i);
+          		getStatistics(area, mean, min, max, std);
+              correctionfactor = (datasetMean-mean);
+              run("Subtract Background...", "rolling=8 slice");
+          		row = nResults;
+          		if (nSlices==1)
+              		setResult("Area ("+unit+"^2)", row, area);
+          		setResult("Mean ", row, mean);
+          		value1=getResult("Mean ",row);
+  		  		a1 = Array.concat(a1, value1);
+      		}
+
+      // Tidy up
+  		selectWindow(copy2);
+  		saveAs("Tiff", dir1+copy2);
+  		close();
+	  	}
 	}
-
-}
-
 setBatchMode(false);
+}

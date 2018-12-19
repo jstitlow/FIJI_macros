@@ -1,7 +1,9 @@
 /* Normalise the intensity of a z-stack
  * 11 December 2018
  *
- * Modifications to allow it to run -headless
+ * Uses 'rolling ball' background subtraction algorithm
+ *
+ * Modifications to allow the code to run -headless
  *
  * Replaced Bioformats with open by enabling SCIFIO, Edit>Options>IM2>Check SCIFIO
  * Also use duplicate hyperstack instead of arrange channels

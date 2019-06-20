@@ -37,10 +37,10 @@ for (j=0; j<list.length; j++) {
 	path=dir1+list[j];
 
 		// Open file
-		open(path);
-	
+		#open(path);
+		run("Bio-Formats (Windowless)", "open=path color_mode=Default concatenate_series group_files rois_import=[ROI manager] split_focal view=Hyperstack stack_order=XYCZT dimensions axis_1_number_of_images=2 axis_1_axis_first_image=1 axis_1_axis_increment=1 contains=[] name=/Users/joshtitlow/tmp/ONI/experiment_HiLow_Brp_Cy31.1532701055376_<1-2>.tif");
 		// Start macro
-		
+		run("Concatenate...", "all_open");
 		// Crop channel 2
 		makeRectangle(584, 6, 427, 992);
 		run("Duplicate...", "duplicate");

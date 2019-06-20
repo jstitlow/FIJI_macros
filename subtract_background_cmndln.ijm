@@ -1,82 +1,83 @@
-/* Normalise the intensity of a z-stack
- * 11 December 2018
+/* Remove background and isolate single channel for downstream FQ analysis
+ * 18 January 2019
  *
  * Uses 'rolling ball' background subtraction algorithm
  *
  * ---Modifications to allow the code to run -headless---
  *
  * -Replaced Bioformats with open by enabling SCIFIO, Edit>Options>IM2>Check SCIFIO
- * -Also use duplicate hyperstack instead of arrange channels
+ * -Duplicate hyperstack instead of arrange channels
  * -Pass directory from command line argument instead of calling finder window
  *
  * ---Macro commands---
  *
+ * Setup directories
  * Select the appropriate channel
- * Measure average intensity of each image
- * Save measurements as an array
- * Calculate stack mean from the array,
- * calculate the difference between the mean intensity of each frame and the stack mean,
- * add the difference from each frame.
- * To normalise an entire dataset, run the script and note the dataset mean intensity from the last file,
- * then replace stackMean in line 74 with the dataset mean intensity value
- *
+ * Subtract background
+ * Save single channel image
+ * 
  * ----Call from the command line with the following script:
- * fiji --headless --console -macro ~/src/FIJI_macros/zstack_normalisation_v7_cmndln.ijm /path/to/directory
+ * fiji --headless --console -macro ~/src/FIJI_macros/subtract_background_cmndln.ijm /path/to/directory
+ *
+ * ---requires absolute path---
  */
 
-macro "Calculate mean stack intensity" {
+macro "Subtract_background" {
 
 setBatchMode(true);
 
-// Load files
-//dir1 = getDirectory("Find directory");
-dir1 = getArgument();
-list = getFileList(dir1);
-smFISH_channel = 1
-// Create blank array to store average intensity from the entire directory
-a2=newArray;
+// Setup directories
+indir = getArgument();
+list = getFileList(indir);
 
-// Set up loop to read all files in a directory
+GFP_channel = ('2');
+smFISH_channel = ('3');
+
+File.makeDirectory(indir+'GFP_channel');
+File.makeDirectory(indir+'smFISH_channel');
+
+GFP_dir = indir+'GFP_channel/';
+smFISH_dir = indir+'smFISH_channel/';
+
+// Setup loop
 for (j=0; j<list.length; j++) {
-	showProgress(j+1, list.length);
-	print("processing ... "+j+1+"/"+list.length+"\n         "+list[j]);
-	path=dir1+list[j];
+        showProgress(j+1, list.length);
+        filename = indir + list[j];
+        if (endsWith(filename, ".tiff"))
+        print("processing ... "+j+1+"/"+list.length+"\n         "+list[j]);
 
-    // Open file
-    open(path);
+        // Open file
+        if (endsWith(filename, ".tiff"))
+        open(filename);
 
-		// Start macro
+        // Start macro
 
-		// Duplicate stack and select specific channel
-		original2 = getTitle();
-		run("Duplicate...", "duplicate channels=smFISH_channel"); // Choose channel here
-		copy2 = getTitle();
-		selectWindow(original2);
-		close();
-		selectWindow(copy2);
+        // Duplicate stack and select specific channel
+        original = getTitle();
+        run("Duplicate...", "duplicate channels=GFP_channel");
+        GFP = getTitle();
 
-    // Step through z-stack and store average intensity measurements in an array
-      		if (nSlices>1) run("Clear Results");
-      		getVoxelSize(w, h, d, unit);
-      		n = getSliceNumber();
-      		for (i=1; i<=nSlices; i++) {
-          		setSlice(i);
-          		getStatistics(area, mean, min, max, std);
-              correctionfactor = (datasetMean-mean);
-              run("Subtract Background...", "rolling=8 slice");
-          		row = nResults;
-          		if (nSlices==1)
-              		setResult("Area ("+unit+"^2)", row, area);
-          		setResult("Mean ", row, mean);
-          		value1=getResult("Mean ",row);
-  		  		a1 = Array.concat(a1, value1);
-      		}
+        selectWindow(original);
+        run("Duplicate...", "duplicate channels=smFISH_channel");
+        smFISH = getTitle();
 
-      // Tidy up
-  		selectWindow(copy2);
-  		saveAs("Tiff", dir1+copy2);
-  		close();
-	  	}
-	}
+        selectWindow(original);
+        close();
+
+	// Subtract background
+        selectWindow(GFP);
+        run("Subtract Background...", "rolling=8 stack");
+        GFP_file = replace(GFP, "-1.tiff", "_GFP.tiff");
+        saveAs("Tiff", GFP_dir+GFP_file);
+        close();
+
+        selectWindow(smFISH);
+        run("Subtract Background...", "rolling=8 stack");
+        smFISH_file = replace(smFISH, "-1.tiff", "_smFISH.tiff");
+        saveAs("Tiff", smFISH_dir+smFISH_file);
+        close();
+
+}
+
 setBatchMode(false);
 }

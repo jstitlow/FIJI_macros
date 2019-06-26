@@ -17,11 +17,17 @@
  */
 
 // Open Finder to choose directory
-indir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/test/";
+indir = "C:\\Users\\sierdsmith\\Desktop\\test PQ\\Data\\";
 //indir = getArgument();
 list = getFileList(indir);
 
 //setBatchMode(true);
+Array.show(list);
+
+//setBatchMode(true);
+run("ImageJ2...", "scijavaio=true loglevel=INFO");
+run("Set Measurements...", "area mean standard min max integrated limit display redirect=None decimal=3");
+run("Close All");
 
 // Set up loop to read all files in a directory
 for (i=0; i<list.length; i++) {
@@ -31,6 +37,7 @@ for (i=0; i<list.length; i++) {
 
 	// Open file
 	open(path);
+	
 
 	// setup channels
    	run("Arrange Channels...", "new=23");
@@ -56,6 +63,17 @@ for (i=0; i<list.length; i++) {
     // run("Convert to Mask", "method=MaxEntropy background=Dark calculate");
     run("Divide...", "value=255 stack");
     corrected_mask = getTitle();
+
+    	// process protein signal
+    	selectWindow(signal);
+    	run("Reverse");
+    	run("Divide...", "value=10000 stack");
+    	run("16-bit");
+    	run("Bleach Correction", "correction=[Exponential Fit]");
+		run("32-bit");    	
+    	run("Multiply...", "value=10000 stack");
+    	run("Subtract Background...", "rolling=60 stack");
+    	corrected_signal = getTitle();
 
     // create inverted mask to determine if 'background' changes
     // convert to 32 bit to accept negative values

@@ -1,0 +1,14 @@
+roiManager("Open", "/Users/joshtitlow/tmp/ONI/RoiSet.zip");
+original = getTitle();
+roiManager("Select", 0);
+run("Duplicate...", "duplicate");
+ch1 = getTitle();
+selectWindow(original);
+roiManager("Select", 1);
+run("Duplicate...", "duplicate");
+ch2 = getTitle();
+run("Merge Channels...", "red=&ch1 green=&ch2 create");
+merged = getTitle();
+saveAs("Tiff", merged);
+close();
+close();

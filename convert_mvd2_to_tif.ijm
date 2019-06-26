@@ -6,11 +6,13 @@ run("Bio-Formats Macro Extensions");
 setBatchMode(true);
 
 // Select .mvd file
-id = File.openDialog("Choose a file");
+//id = File.openDialog("Choose a file");
+id = "/usr/people/bioc1301/data/20190313_AdultBrain_MB077c_CamKYFP_smFISH_learning/20190313_AdultBrain_MB077c_CamKYFP_smFISH_learning.mvd2";
 print("Image path: " + id);
 
 // Select output directory
-savedir = getDirectory("Choose a Storage Directory");
+//savedir = getDirectory("Choose a Storage Directory");
+savedir = "/usr/people/bioc1301/data/20190313_AdultBrain_MB077c_CamKYFP_smFISH_learning";
 
 // Determine the number of series in the file
 Ext.setId(id);

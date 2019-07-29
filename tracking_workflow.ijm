@@ -19,7 +19,7 @@
 setBatchMode(true);
 
 // Load files
-indir = "/usr/people/bioc1301/data/20190529_sggMS2_MCPGFP_stim/raw_data/";
+indir = "/usr/people/bioc1301/data/20190529_sggMS2_MCPGFP_stim/rawdata/";
 // indir = getDirectory("Select a directory");
 list = getFileList(indir);
 

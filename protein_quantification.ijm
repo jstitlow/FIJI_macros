@@ -8,7 +8,7 @@
  *
  *   -Normalise z intensity with 'Bleach Correction' algorithm
  *   -Sharpen and flatten field with 'Subtract Background' algorithm
- * 
+ *
  *  --USAGE--
  *
  *   -Call from the command line:
@@ -16,15 +16,43 @@
  *
  */
 
+<<<<<<< HEAD
 
 //run("ImageJ2...", "scijavaio=true loglevel=INFO");
-//run("Set Measurements...", "area mean standard min max integrated limit display redirect=None decimal=3");
+run("Set Measurements...", "area mean standard min max integrated limit display redirect=None decimal=3");
 
 
-//setBatchMode(true);
+setBatchMode(true);
 
 // setup channels and outfile
-indir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/test/";
+//indir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/test/";
+indir = getArgument();
+//outdir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/Results/"'
+list = getFileList(indir);
+openfile = File.open(indir + "Results.txt");
+headings = "Label	Area	Mean	StdDev	Min	Max	IntDen	RawIntDen	MinThr	MaxThr";
+print (openfile, headings);
+File.close(openfile);
+outfile = indir + "Results.txt"
+
+// function to append results table
+// call with print_results(imageID, outfile);
+function print_results(imageID, outfile){
+	Label = imageID;
+	Area = getResult("Area", 0);
+	Mean = getResult("Mean", 0);
+	StdDev = getResult("StdDev", 0);
+	Min = getResult("Min", 0);
+	Max = getResult("Max", 0);
+	IntDen = getResult("IntDen", 0);
+	RawIntDen = getResult("RawIntDen", 0);
+	MinThr = getResult("MinThr", 0);
+	MaxThr = getResult("MaxThr", 0);
+	File.append(Label+" "+Area+" "+Mean+" "+StdDev+" "+Min+" "+Max+" "+IntDen+" "+RawIntDen+" "+MinThr+" "+MaxThr, outfile);
+}
+
+//run("Close All");
+
 //indir = getArgument();
 //outdir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/Results/"'
 list = getFileList(indir);
@@ -51,6 +79,7 @@ function print_results(imageID, outfile){
 }
 
 run("Close All");
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325
 
 
 // Set up loop to read all files in a directory
@@ -61,6 +90,14 @@ for (i=0; i<list.length; i++) {
 
 	// Open file
 	open(path);
+<<<<<<< HEAD
+
+    	// setup channels
+    	//run("Arrange Channels...", "new=23");
+	image = getTitle();
+    	run("Split Channels");
+    	signal = "C2-" + image;
+    	mask = "C3-" + image;
 
 	// setup channels
     //run("Arrange Channels...", "new=23");
@@ -77,13 +114,39 @@ for (i=0; i<list.length; i++) {
     run("16-bit");
     run("Bleach Correction", "correction=[Exponential Fit]");
     run("Subtract Background...", "rolling=60 stack");
-	run("32-bit");    	
+	run("32-bit");
    	run("Multiply...", "value=255 stack");
    	corrected_signal = getTitle();
 
    	// create mask
    	selectWindow(mask);
    	run("Reverse");
+   	run("Subtract Background...", "rolling=60 stack");
+   	run("Convert to Mask", "method=Otsu background=Dark calculate");
+
+   	// code for testing alternative threshold algorithm
+    // run("Convert to Mask", "method=MaxEntropy background=Dark calculate");
+    run("Divide...", "value=255 stack");
+    corrected_mask = getTitle();
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325
+
+    	// process protein signal
+    	selectWindow(signal);
+    	run("Reverse");
+<<<<<<< HEAD
+	run("Slice Remover", "first=1 last=5 increment=1");
+    	run("Divide...", "value=255 stack");
+    	run("16-bit");
+    	run("Bleach Correction", "correction=[Exponential Fit]");
+    	run("Subtract Background...", "rolling=60 stack");
+    	run("32-bit");
+   	run("Multiply...", "value=255 stack");
+   	corrected_signal = getTitle();
+
+   	// create mask
+   	selectWindow(mask);
+   	run("Reverse");
+	run("Slice Remover", "first=1 last=5 increment=1");
    	run("Subtract Background...", "rolling=60 stack");
    	run("Convert to Mask", "method=Otsu background=Dark calculate");
 
@@ -103,10 +166,18 @@ for (i=0; i<list.length; i++) {
    	// apply mask to protein image in 2um volume at the center of the image
    	imageCalculator("Multiply create 32-bit stack", corrected_signal, corrected_mask);
    	middle_slice = floor((nSlices()/2))+1;
+   	run("Abs", "stack");
+   	corrected_invert_mask = getTitle();
+
+    // apply mask to protein image in 2um volume at the center of the image
+    imageCalculator("Multiply create 32-bit stack", corrected_signal, corrected_mask);
+    middle_slice = floor((nSlices()/2))+1;
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325
    	range_min = maxOf(middle_slice -5,1);
    	range_max = minOf(nSlices(),middle_slice +5);
    	range = "" + range_min + "-" + range_max;
    	run("Duplicate...", "duplicate range="+range);
+<<<<<<< HEAD
 	run("Z Project...","projection=[Sum Slices]");
    	run("Measure");
    	//rename(image + "_mask_signal");
@@ -127,7 +198,41 @@ for (i=0; i<list.length; i++) {
    	run("Measure");
    	//rename(image + "_invert_mask_signal");
    	print_results(image + "_mask_vol", outfile);
-   	
+
+   	selectWindow(corrected_invert_mask);
+   	run("Duplicate...", "duplicate range="+range);
+
+   	run("Z Project...","projection=[Sum Slices]");
+   	run("Measure");
+   	//rename(image + "_inv_mask_vol");
+	print_results(image + "_invert__mask_vol", outfile);
+    	// tidy up
+    	//run("Clear Results");
+    	//run("Close All")
+
+}
+
+setBatchMode(false);
+   	run("Measure");
+   	//rename(image + "_mask_signal");
+	print_results(image + "_mask_signal", outfile);
+
+   	// apply inverted mask to protein image
+   	imageCalculator("Multiply create 32-bit stack", corrected_signal, corrected_invert_mask);
+   	run("Duplicate...", "duplicate range="+range);
+   	run("Z Project...","projection=[Sum Slices]");
+   	run("Measure");
+   	//rename(image + "_invert_mask_signal");
+   	print_results(image + "_invert_mask_signal", outfile);
+
+   	// measure volume of both masks
+   	selectWindow(corrected_mask);
+   	run("Duplicate...", "duplicate range="+range);
+   	run("Z Project...","projection=[Sum Slices]");
+   	run("Measure");
+   	//rename(image + "_invert_mask_signal");
+   	print_results(image + "_mask_vol", outfile);
+
    	selectWindow(corrected_invert_mask);
    	run("Duplicate...", "duplicate range="+range);
 
@@ -138,7 +243,8 @@ for (i=0; i<list.length; i++) {
     // tidy up
     //run("Clear Results");
     //run("Close All")
-   
+
 }
 
 //setBatchMode(false);
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325

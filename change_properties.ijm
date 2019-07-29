@@ -1,7 +1,23 @@
+<<<<<<< HEAD
 setBatchMode(true);
 
 // setup channels and outfile
 indir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/test/";
+=======
+/*  Change properties in batch
+ *
+ *  --USAGE--
+ *
+ *   -Call from the command line:
+ *   > fiji --headless --console -macro ~/src/FIJI_macros/change_properties.ijm
+ *
+ */
+
+setBatchMode(true);
+
+// setup channels and outfile
+indir = "/usr/people/bioc1301/data/20190710_CaMKIIYFP_YFP647ATTO_MB112c_myrSNAP_JF546SNAP_viol/image/";
+>>>>>>> 63e9e153150659ceba898dd0b5ead5f2ef29524c
 list = getFileList(indir);
 
 // Set up loop to read all files in a directory
@@ -19,4 +35,8 @@ for (i=0; i<list.length; i++) {
 
 }
 
+<<<<<<< HEAD
 setBatchMode(false);
+=======
+setBatchMode(false);
+>>>>>>> 63e9e153150659ceba898dd0b5ead5f2ef29524c

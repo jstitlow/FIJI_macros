@@ -16,6 +16,7 @@
  *
  */
 
+<<<<<<< HEAD
 
 //run("ImageJ2...", "scijavaio=true loglevel=INFO");
 run("Set Measurements...", "area mean standard min max integrated limit display redirect=None decimal=3");
@@ -52,6 +53,20 @@ function print_results(imageID, outfile){
 
 //run("Close All");
 
+=======
+// Open Finder to choose directory
+indir = "C:\\Users\\sierdsmith\\Desktop\\test PQ\\Data\\";
+//indir = getArgument();
+list = getFileList(indir);
+
+//setBatchMode(true);
+Array.show(list);
+
+//setBatchMode(true);
+run("ImageJ2...", "scijavaio=true loglevel=INFO");
+run("Set Measurements...", "area mean standard min max integrated limit display redirect=None decimal=3");
+run("Close All");
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325
 
 // Set up loop to read all files in a directory
 for (i=0; i<list.length; i++) {
@@ -61,6 +76,7 @@ for (i=0; i<list.length; i++) {
 
 	// Open file
 	open(path);
+<<<<<<< HEAD
 
     	// setup channels
     	//run("Arrange Channels...", "new=23");
@@ -68,10 +84,39 @@ for (i=0; i<list.length; i++) {
     	run("Split Channels");
     	signal = "C2-" + image;
     	mask = "C3-" + image;
+=======
+	
+
+	// setup channels
+   	run("Arrange Channels...", "new=23");
+    image = getTitle();
+    run("Split Channels");
+    signal = "C1-" + image;
+    mask = "C2-" + image;
+    
+    // process protein signal
+    selectWindow(signal);
+    run("Reverse");
+    run("16-bit");
+    run("Bleach Correction", "correction=[Exponential Fit]");
+    run("Subtract Background...", "rolling=60 stack");
+    corrected_signal = getTitle();
+
+    // create mask
+    selectWindow(mask);
+    run("Reverse");
+    run("Subtract Background...", "rolling=60 stack");
+    run("Convert to Mask", "method=Otsu background=Dark calculate");
+   	// code for testing alternative threshold algorithm
+    // run("Convert to Mask", "method=MaxEntropy background=Dark calculate");
+    run("Divide...", "value=255 stack");
+    corrected_mask = getTitle();
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325
 
     	// process protein signal
     	selectWindow(signal);
     	run("Reverse");
+<<<<<<< HEAD
 	run("Slice Remover", "first=1 last=5 increment=1");
     	run("Divide...", "value=255 stack");
     	run("16-bit");
@@ -104,10 +149,32 @@ for (i=0; i<list.length; i++) {
    	// apply mask to protein image in 2um volume at the center of the image
    	imageCalculator("Multiply create 32-bit stack", corrected_signal, corrected_mask);
    	middle_slice = floor((nSlices()/2))+1;
+=======
+    	run("Divide...", "value=10000 stack");
+    	run("16-bit");
+    	run("Bleach Correction", "correction=[Exponential Fit]");
+		run("32-bit");    	
+    	run("Multiply...", "value=10000 stack");
+    	run("Subtract Background...", "rolling=60 stack");
+    	corrected_signal = getTitle();
+
+    // create inverted mask to determine if 'background' changes
+    // convert to 32 bit to accept negative values
+    run("Duplicate...", "duplicate");
+    run("32-bit");
+    run("Subtract...", "value=1 stack");
+   	run("Abs", "stack");
+    corrected_invert_mask = getTitle();
+
+    // apply mask to protein image in 2um volume at the center of the image
+    imageCalculator("Multiply create 32-bit stack", corrected_signal, corrected_mask);
+    middle_slice = floor((nSlices()/2))+1;
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325
    	range_min = maxOf(middle_slice -5,1);
    	range_max = minOf(nSlices(),middle_slice +5);
    	range = "" + range_min + "-" + range_max;
    	run("Duplicate...", "duplicate range="+range);
+<<<<<<< HEAD
 	run("Z Project...","projection=[Sum Slices]");
    	run("Measure");
    	//rename(image + "_mask_signal");
@@ -143,3 +210,35 @@ for (i=0; i<list.length; i++) {
 }
 
 setBatchMode(false);
+=======
+   	rename(image + "_mask_signal");
+   	run("Measure");
+	
+    // apply inverted mask to protein image
+    imageCalculator("Multiply create 32-bit stack", corrected_signal, corrected_invert_mask);
+    run("Duplicate...", "duplicate range="+range);
+    rename(image + "_invert_mask_signal");
+    run("Measure");
+    	
+    // measure volume of both masks
+    selectWindow(corrected_mask);
+    run("Duplicate...", "duplicate range="+range);
+    rename(image + "_mask_vol");
+    run("Measure");
+
+    selectWindow(corrected_invert_mask);
+    run("Duplicate...", "duplicate range="+range);
+    rename(image + "_inv_mask_vol");
+    run("Measure");
+
+    //while (nImages>0) {
+    //         selectImage(nImages);
+    //          close();
+    //}
+
+}
+
+//saveAs("Results", indir+"Results.csv");
+
+//setBatchMode(false);
+>>>>>>> 75fdae9587663ef51c810da7589e266888412325

@@ -6,30 +6,30 @@
 setBatchMode(true);
 
 // Load files
-indir = getDirectory("~/Desktop/test_batch");
+indir = "/Users/joshtitlow/OneDrive - Nexus365/SypPaper/Data/FINAL/coloc_analysis/20190621_eIF4eGFP_msp670_syp568_HRP_viol/mock/";
 list = getFileList(indir);
-
-channel = 1;
-
 
 // Set up loop to read all files in a directory
 for (i=0; i<list.length; i++) {
+	if(endsWith(list[i],".tif")){
 	showProgress(i+1, list.length);
 	print("processing ... "+i+1+"/"+list.length+"\n         "+list[i]);
 	path=indir+list[i];
 		
-		// Open file
-		run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
+	// Open file
+	run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
 		
-		// Start macro
-		
-		// Duplicate stack and select specific channel
-		original = getTitle();
-		run("Duplicate...", "duplicate channels=channel"); 
-		copy = getTitle();
-		selectWindow(original);
-		close();
-		saveAs("Tiff", indir+copy);
+	// get image channels
+	run("Arrange Channels...", "new=2");
+	
+	// save images
+	saveAs("Tiff", indir+substring(list[i], 0, lengthOf(list[i])-3) + "-2.tif");
+
+	close();
+	
+	}
 }
+
+setBatchMode(false);
 
 		

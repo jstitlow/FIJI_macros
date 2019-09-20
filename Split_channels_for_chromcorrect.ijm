@@ -29,7 +29,7 @@ for (i=0; i<seriesCount; i++) { // when extracting images directly from an mvd2 
 	showProgress(i+1, seriesCount);
 	print("processing ... "+i+1+"/"+seriesCount+"\n         "+image_name);
 
-// 
+//
 /*
 for (i=0; i<list.length; i++) {
 	showProgress(i+1, list.length);
@@ -41,7 +41,7 @@ for (i=0; i<list.length; i++) {
 	run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
 	open(path);
  */
- 
+
 	// get image channels
 	run("Arrange Channels...", "new=123");
 
@@ -60,7 +60,7 @@ for (i=0; i<seriesCount; i++) { // when extracting images directly from an mvd2 
 	showProgress(i+1, seriesCount);
 	print("processing ... "+i+1+"/"+seriesCount+"\n         "+image_name);
 
-// 
+//
 /*
 for (i=0; i<list.length; i++) {
 	showProgress(i+1, list.length);
@@ -72,7 +72,7 @@ for (i=0; i<list.length; i++) {
 	run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
 	open(path);
  */
- 
+
 	// get image channels
 	run("Arrange Channels...", "new=456");
 

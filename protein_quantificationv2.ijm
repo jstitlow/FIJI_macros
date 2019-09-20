@@ -15,14 +15,14 @@
  *     > fiji --headless --console -macro ~/src/FIJI_macros/protein_quantificationv2.ijm /path/to/directory
  *
  */
-
+run("Close All");
 //run("ImageJ2...", "scijavaio=true loglevel=INFO");
 run("Set Measurements...", "area mean standard min max integrated limit display redirect=None decimal=3");
 
-setBatchMode(true);
+//setBatchMode(true);
 
 // setup channels and outfile
-//indir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/test/";
+//indir = "Z:\\data\\AdultBrain_smFISH_MASTER\\20190123_AdultBrain_RG03C_CamkIIYFP_smFISH_learning\\";
 indir = getArgument();
 //outdir = "/Users/joshtitlow/tmp/AdultBrain_smFISH/Results/"'
 list = getFileList(indir);
@@ -59,7 +59,17 @@ function print_results(imageID, outfile){
 //run("Close All");
 
 // Set up loop to read all files in a directory
+//i=0;
 for (i=0; i<list.length; i++) {
+    if(endsWith(list[i],".r3d")){
+
+
+//for (j=0; j<list.length; j++) {
+//print(list[j] + "  " + j);
+//}
+//i=19;
+//j=19;
+//print(list[j]);
     showProgress(i+1, list.length);
     print("processing ... "+i+1+"/"+list.length+"\n         "+list[i]);
     path=indir+list[i];
@@ -78,12 +88,12 @@ for (i=0; i<list.length; i++) {
     selectWindow(signal);
     run("Reverse");
     run("Slice Remover", "first=5 last=5 increment=1");
-    run("Divide...", "value=255 stack");
-    run("16-bit");
-    run("Bleach Correction", "correction=[Exponential Fit]");
+//    run("Divide...", "value=1000 stack");
+//    run("16-bit");
+    //run("Bleach Correction", "correction=[Exponential Fit]");
     run("Subtract Background...", "rolling=60 stack");
-    run("32-bit");
-    run("Multiply...", "value=255 stack");
+//    run("32-bit");
+//    run("Multiply...", "value=1000 stack");
     corrected_signal = getTitle();
 
     // create mask
@@ -119,7 +129,7 @@ for (i=0; i<list.length; i++) {
     //rename(image + "_mask_signal");
     print_results(image + "_mask_signal", outfile);
     maskedSignal = getResult("RawIntDen", 0);
-
+ 	run("Clear Results");
     // apply inverted mask to protein image
     imageCalculator("Multiply create 32-bit stack", corrected_signal, corrected_invert_mask);
     run("Duplicate...", "duplicate range="+range);
@@ -128,7 +138,7 @@ for (i=0; i<list.length; i++) {
     //rename(image + "_invert_mask_signal");
     print_results(image + "_invert_mask_signal", outfile);
     InvertedMaskedSignal = getResult("RawIntDen", 0);
-
+ 	run("Clear Results");
     // measure volume of both masks
     selectWindow(corrected_mask);
     run("Duplicate...", "duplicate range="+range);
@@ -137,7 +147,8 @@ for (i=0; i<list.length; i++) {
     //rename(image + "_invert_mask_signal");
     print_results(image + "_mask_vol", outfile);
     maskedVol = getResult("RawIntDen", 0);
-
+	run("Clear Results");
+	
     selectWindow(corrected_invert_mask);
     run("Duplicate...", "duplicate range="+range);
 
@@ -146,14 +157,21 @@ for (i=0; i<list.length; i++) {
     //rename(image + "_inv_mask_vol");
     print_results(image + "_invert__mask_vol", outfile);
     invertedMaskedVol = getResult("RawIntDen", 0);
+    run("Clear Results");
     meanSignal = maskedSignal/maskedVol;
+       print("maskedSignal "+maskedSignal+"maskedVol "+maskedVol);
     meanBackground = InvertedMaskedSignal/invertedMaskedVol;
+       print("InvertedMaskedSignal "+InvertedMaskedSignal+"invertedMaskedVol "+maskedVol);
 
     File.append(image+" "+meanSignal+" "+meanBackground, outfileprocessed);
+    print(image+" "+meanSignal+" "+meanBackground, outfileprocessed);
     // tidy up
-    run("Clear Results");
-    run("Close All");
-
+ // run("Clear Results");
+  //  run("Close All");
+ //   i=i+1;
+ //   break;
+    }
+//break;
 }
 
 setBatchMode(false);

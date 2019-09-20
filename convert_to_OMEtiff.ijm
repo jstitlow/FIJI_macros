@@ -15,21 +15,19 @@ for (i=0; i<list.length; i++) {
 	showProgress(i+1, list.length);
 	print("processing ... "+i+1+"/"+list.length+"\n         "+list[i]);
 	path=indir+list[i];
-		
+
 	// Open file
 	run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
-		
+
 	// get image channels
 	run("Arrange Channels...", "new=2");
-	
+
 	// save images
-	saveAs("Tiff", indir+substring(list[i], 0, lengthOf(list[i])-3) + "-2.tif");
+	run("OME-TIFF...", "save=indir+substring(list[i], 0, lengthOf(list[i])-4) + ".ome.tiff compression=Uncompressed");
 
 	close();
-	
+
 	}
 }
 
 setBatchMode(false);
-
-		

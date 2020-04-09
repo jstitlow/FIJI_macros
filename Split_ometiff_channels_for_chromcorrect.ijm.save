@@ -1,0 +1,52 @@
+
+
+
+setBatchMode(true);
+
+// Get data dir and create output dirs
+//indir = "/usr/people/bioc1301/data/20190724_CaMKIIYFP_ATTO647_MB112c_myrSNAP_SNAP547_viol/";
+indir = getDirectory("choose image directory");
+list = getFileList(indir);
+File.makeDirectory(indir + "image/");
+File.makeDirectory(indir + "cal/");
+
+// set up loop to get image files
+for (i=0; i<list.length; i++) { 
+	if(endsWith(list[i],".tiff")){
+		showProgress(i+1, list.length);
+		print("processing ... "+i+1+"/"+list.length+"\n         "+list[i]);
+		image_name = list[i];
+		path=indir+list[i];
+		
+		// Open file
+    	//open(path);
+		run("Bio-Formats", "open=path color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
+		original = getTitle();
+		run("Duplicate...", "duplicate");
+		copy = getTitle();
+
+		selectWindow(original);
+		
+		// get image channels
+		run("Arrange Channels...", "new=123");
+	
+		// save images
+		saveAs("Tiff", indir+"image/"+list[i]);
+	
+		close();
+
+		selectWindow(copy);
+		
+		run("Arrange Channels...", "new=456");
+
+		// save images
+		saveAs("Tiff", indir+"cal/"+list[i]);
+
+		close();
+				
+	}
+}
+
+
+
+setBatchMode(false);
